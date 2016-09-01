@@ -1,0 +1,2 @@
+export GOCD_VER=16.8.0
+export GOCD_SUBVER=3929
