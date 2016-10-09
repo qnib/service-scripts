@@ -171,4 +171,4 @@ for srv in $(egrep -o "[a-z0-9\-]+:\s+\#[a-z0-9]+" ${COMPOSE_FILE} |sed -e 's/ /
 
 done
 
-#rm -f ${COMPOSE_JSON}
+rm -f ${COMPOSE_JSON}
