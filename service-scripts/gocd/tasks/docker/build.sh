@@ -33,4 +33,4 @@ else
 fi
 
 echo ">> BUILD >>> Build Dockerfile"
-docker build -t ${BUILD_IMG_NAME} .
+docker build --no-cache -t ${BUILD_IMG_NAME} .
