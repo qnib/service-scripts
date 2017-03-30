@@ -8,7 +8,7 @@
 
 
 if [ "$#" -ne 1 ]; then
-    echo "Illegal number of parameters '$#', please only provide compose file"
+    echo "[ERROR  ] Illegal number of parameters '$#', please only provide compose file"
     exit 1
 fi
 
@@ -18,7 +18,7 @@ SRV_MODE=${SRV_MODE:-replicated}
 
 COMPOSE_FILE=$(find ${1} -name "docker-compose*")
 if [ "X${COMPOSE_FILE}" == "X" ];then
-  echo "!! Could not find compose file... exit"
+  echo "[ERROR  ] Could not find compose file... exit"
   exit 101
 fi
 COMPOSE_JSON=$(echo ${COMPOSE_FILE} |sed -e 's/yaml/json/')
@@ -26,13 +26,15 @@ if [ ${COMPOSE_FILE} == ${COMPOSE_JSON} ];then
     COMPOSE_JSON=$(echo ${COMPOSE_FILE} |sed -e 's/yml/json/')
 fi
 if [ ${COMPOSE_FILE} == ${COMPOSE_JSON} ];then
-    echo "!! yaml and json file are equal... (${COMPOSE_FILE} == ${COMPOSE_JSON})"
+    echo "[ERROR  ] yaml and json file are equal... (${COMPOSE_FILE} == ${COMPOSE_JSON})"
     exit 102
 fi
 echo ">> COMPOSE_FILE=${COMPOSE_FILE}"
 python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)' < ${COMPOSE_FILE} > ${COMPOSE_JSON}
 echo ">> COMPOSE_JSON=${COMPOSE_JSON}"
+cur_svc_cnt=0
 for srv in $(egrep -o "[a-z0-9\-]+:\s+\#[a-z0-9]+" ${COMPOSE_FILE} |sed -e 's/ /_/g');do
+  cur_svc_cnt=$(echo ${cur_svc_cnt}+1 |bc)
   SERVICE_SCALE=$(echo ${srv} |awk -F\:\_\# '{print $2}')
   if [ ${SERVICE_SCALE} == "global" ];then
     SRV_MODE=global
@@ -47,7 +49,7 @@ for srv in $(egrep -o "[a-z0-9\-]+:\s+\#[a-z0-9]+" ${COMPOSE_FILE} |sed -e 's/ /
   CUR_SRV_MODE=$(docker service inspect -f '{{json .Spec.Mode }}' ${ADV_SRV_NAME} |jq '. |keys[] |ascii_downcase' |tr -d '"')
   CUR_SVC_IMG=$(docker service ls -f name=${ADV_SRV_NAME} |grep -v "^ID" |awk '{print $4}')
   if [ "X${CUR_SVC_IMG}" != "X" ];then
-    CUR_SVC_CNT=$(docker service ps --filter desired-state=running ${ADV_SRV_NAME} |grep -c ${ADV_SRV_NAME})
+    CUR_SVC_CNT=$(docker service ps --filter desired-state=running ${ADV_SRV_NAME} |grep -c " ${ADV_SRV_NAME} ")
     echo ">>>>> Current service count '${CUR_SVC_CNT}'"
   else
     CUR_SVC_CNT=0
@@ -113,14 +115,16 @@ for srv in $(egrep -o "[a-z0-9\-]+:\s+\#[a-z0-9]+" ${COMPOSE_FILE} |sed -e 's/ /
           SLAB_KEY=$(echo ${SLAB} |awk -F\= '{print $1}')
           SLAB_VAL=$(echo ${SLAB} |awk -F\= '{print $2}')
           if [  ${SLAB_KEY} == "org.qnib.service.depend_on" ];then
-              # check if dependency is up'n'runnin
-              if [ $(docker service ls -q -f name=${SLAB_VAL} |wc -l) -eq 0 ];then
-                  echo "!! Service dependency '${SLAB_VAL}' is not running, exit..."
-                  docker service ls
-                  exit 100
-              else
-                  echo ">>> Service dependency '${SLAB_VAL}' is running, off we go.."
-              fi
+              # check if dependencies are up'n'runnin
+              for DSVC in $(echo ${SLAB_VAL} |sed -e 's/,/ /g');do
+                  if [ $(docker service ls -q -f name=${DSVC} |wc -l) -eq 0 ];then
+                      echo "[ERROR  ] Service dependency '${DSVC}' is not running, exit..."
+                      docker service ls
+                      exit 100
+                  else
+                      echo "[PROCEED] Service dependency '${DSVC}' is running, off we go.."
+                  fi
+              done
           else
               SRV_LABELS="${SRV_LABELS} ${SLAB}"
           fi
@@ -139,7 +143,7 @@ for srv in $(egrep -o "[a-z0-9\-]+:\s+\#[a-z0-9]+" ${COMPOSE_FILE} |sed -e 's/ /
     SCALE_OPTS="--mode=replicated --replicas=${SERVICE_SCALE}"
   fi
   if [ ${CUR_SVC_CNT} -eq 0 ];then
-      echo "No service running..."
+      echo "[PROCEED] No service running..."
 
       set -e
       echo ">>> docker service create --name ${ADV_SRV_NAME} ${SRV_ENV} \ "
@@ -159,16 +163,18 @@ for srv in $(egrep -o "[a-z0-9\-]+:\s+\#[a-z0-9]+" ${COMPOSE_FILE} |sed -e 's/ /
   else
     echo ">> Service already running"
     if [ "${LATEST_SVC_IMG}" != ${CUR_SVC_IMG} ];then
-        echo ">>>>> Current IMG '${CUR_SVC_IMG}' does not match '${LATEST_SVC_IMG}', update necessary"
+        echo "[PROCEED] Current IMG '${CUR_SVC_IMG}' does not match '${LATEST_SVC_IMG}', update necessary"
         echo ">>> docker service update --image ${LATEST_SVC_IMG} ${ADV_SRV_NAME}"
         #docker service update --image ${LATEST_SVC_IMG} ${ADV_SRV_NAME}
     elif [ ${SRV_MODE} == "replicated" ] && [ ${CUR_SVC_CNT} -ne ${SERVICE_SCALE} ];then
-        echo ">>>>> Current scale is not right (${CUR_SVC_CNT} -ne ${SERVICE_SCALE}), update necessary"
+        echo "[PROCEED] Current scale is not right (${CUR_SVC_CNT} -ne ${SERVICE_SCALE}), update necessary"
         echo ">>> docker service update ${SCALE_OPTS} ${ADV_SRV_NAME}"
         docker service update ${SCALE_OPTS} ${ADV_SRV_NAME}
     fi
   fi
-
+  if [ ${cur_svc_cnt} -gt 1 ];then
+      sleep 2
+  fi
 done
 
 rm -f ${COMPOSE_JSON}
