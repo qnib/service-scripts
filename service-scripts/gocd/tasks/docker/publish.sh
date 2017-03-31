@@ -24,7 +24,7 @@ if [ "X${SKIP_TAG_LATEST}" != "Xtrue" ];then
       docker tag ${BUILD_IMG_NAME} ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}
       docker push ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}
       BUILD_IMG_REPODIGEST=$(docker inspect -f '{{(index .RepoDigests 0) }}' ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG})
-      echo ${BUILD_IMG_REPODIGEST} > ${ARTIFACTS_DIR}/target/${DOCKER_TAG}.image_name
+      echo ${BUILD_IMG_REPODIGEST} > ${ARTIFACTS_DIR}/target/${IMG_NAME}.image_name
       docker rmi ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}
     fi
 else
@@ -40,7 +40,7 @@ if [ "X${DOCKER_TAG_REV}" == "Xtrue" ];then
         docker tag ${BUILD_IMG_NAME} ${DOCKER_REG}/${BUILD_REV_NAME}
         docker push ${DOCKER_REG}/${BUILD_REV_NAME}
         BUILD_IMG_REPODIGEST=$(docker inspect -f '{{(index .RepoDigests 0) }}' ${DOCKER_REG}/${BUILD_REV_NAME})
-        echo ${BUILD_IMG_REPODIGEST} > ${ARTIFACTS_DIR}/target/${DOCKER_TAG}-rev${GO_PIPELINE_COUNTER}.image_name
+        echo ${BUILD_IMG_REPODIGEST} > ${ARTIFACTS_DIR}/target/${IMG_NAME}.image_name
         docker rmi ${DOCKER_REG}/${BUILD_REV_NAME}
     fi
 else
