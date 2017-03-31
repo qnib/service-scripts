@@ -10,9 +10,11 @@ assemble_build_img_name
 
 # figure out information about the parent
 query_parent
-
 mkdir -p target/
-env > target/build.env
+rm -f target/build.env
+for E in $(env);do 
+    echo export $(echo ${E} |sed -e 's/ /_/g') >> target/build.env
+done
 
 if [ -d docker ];then
     cd docker
