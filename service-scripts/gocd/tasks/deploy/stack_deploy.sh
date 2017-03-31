@@ -4,7 +4,7 @@ PNAME=$(echo ${GO_PIPELINE_NAME} |sed -e "s/${GO_ENVIRONMENT_NAME}-//")
 
 cd ${PNAME}
 if [[ -x ./predeploy.sh ]];then
-    ./predeploy.sh
+    source ./predeploy.sh
 fi
 /opt/service-scripts/gocd/common/bin/download-artifacts.sh
 
