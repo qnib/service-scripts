@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 PNAME=$(echo ${GO_PIPELINE_NAME} |sed -e "s/${GO_ENVIRONMENT_NAME}-//")
 
