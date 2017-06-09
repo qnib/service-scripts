@@ -4,6 +4,10 @@ echo ">> BUILD"
 
 source /opt/service-scripts/gocd/helpers/gocd-functions.sh
 
+DOCKER_BUILD_OPTS="--no-cache"
+if [[ "X${DOCKER_FORCE_PULL}" == "Xtrue" ]];then
+  DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --pull"
+fi
 
 # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
 assemble_build_img_name
@@ -34,5 +38,5 @@ else
      fi
 fi
 
-echo ">> BUILD >>> Build Dockerfile"
-docker build --no-cache -t ${BUILD_IMG_NAME} .
+echo ">> BUILD >>> Build Dockerfile: docker build ${DOCKER_BUILD_OPTS} -t ${BUILD_IMG_NAME} ."
+docker build ${DOCKER_BUILD_OPTS} -t ${BUILD_IMG_NAME} .
