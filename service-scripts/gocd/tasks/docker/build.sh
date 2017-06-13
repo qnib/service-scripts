@@ -23,6 +23,9 @@ done
 if [ -d docker ];then
     cd docker
 fi
+if [[ -d deploy/docker/ ]];then
+    rsync -aP deploy/docker/. .
+fi
 
 echo ">> BUILD >>> Add DOCKER_REG to Dockerfile"
 REG_IMG_NAME=$(grep ^FROM Dockerfile | awk '{print $2}')
