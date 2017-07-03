@@ -16,9 +16,14 @@ assemble_build_img_name
 query_parent
 mkdir -p target/
 rm -f target/build.env
-for E in $(env);do 
+for E in $(env);do
     echo export $(echo ${E} |sed -e 's/ /_/g') >> target/build.env
 done
+
+FROM_IMG_FILE=$(find ./target -name "*.image_name" |head -n1)
+if [[ "X${FROM_IMG_FILE}" != "X" ]];then
+    DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=FROM_IMAGE_NAME=$(cat ${FROM_IMG_FILE} |awk -F/ '{print $NF}')"
+fi
 
 if [ -d docker ];then
     cd docker
