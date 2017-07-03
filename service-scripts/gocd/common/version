@@ -1,2 +1,2 @@
-export GOCD_VER=17.6.0
-export GOCD_SUBVER=5142
+export GOCD_VER=17.7.0
+export GOCD_SUBVER=5147
