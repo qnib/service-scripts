@@ -23,8 +23,10 @@ if [ "X${SKIP_TAG_LATEST}" != "Xtrue" ];then
       echo ">> Publish >>> Push image to ${DOCKER_REG}: docker tag/push/rmi ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}"
       docker tag ${BUILD_IMG_NAME} ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}
       docker push ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}
-      BUILD_IMG_REPODIGEST=$(docker inspect -f '{{(index .RepoDigests 0) }}' ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG})
-      echo ${BUILD_IMG_REPODIGEST} > ${ARTIFACTS_DIR}/target/${IMG_NAME}.image_name
+      BUILD_IMG_REPODIGEST=$(docker inspect -f '{{(index .RepoDigests 0) }}' ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG} |awk -F\@ '{print $2}')
+      IMG_FULL_NAME="${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}@${BUILD_IMG_REPODIGEST}"
+      echo ">> Full name of image: ${IMG_FULL_NAME}"
+      echo ${IMG_FULL_NAME} > ${ARTIFACTS_DIR}/target/${IMG_NAME}.image_name
       docker rmi ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}
     fi
 else
@@ -39,8 +41,10 @@ if [ "X${DOCKER_TAG_REV}" == "Xtrue" ];then
         echo ">> Publish >>> Tag image remotely with build revision: docker tag/push/rmi ${DOCKER_REG}/${BUILD_REV_NAME}"
         docker tag ${BUILD_IMG_NAME} ${DOCKER_REG}/${BUILD_REV_NAME}
         docker push ${DOCKER_REG}/${BUILD_REV_NAME}
-        BUILD_IMG_REPODIGEST=$(docker inspect -f '{{(index .RepoDigests 0) }}' ${DOCKER_REG}/${BUILD_REV_NAME})
-        echo ${BUILD_IMG_REPODIGEST} > ${ARTIFACTS_DIR}/target/${IMG_NAME}.image_name
+        BUILD_IMG_REPODIGEST=$(docker inspect -f '{{(index .RepoDigests 0) }}' ${DOCKER_REG}/${BUILD_REV_NAME} |awk -F\@ '{print $2}')
+        IMG_FULL_NAME="${DOCKER_REG}/${BUILD_REV_NAME}@${BUILD_IMG_REPODIGEST}"
+        echo ">> Full name of image: ${IMG_FULL_NAME}"
+        echo ${IMG_FULL_NAME} > ${ARTIFACTS_DIR}/target/${IMG_NAME}.image_name
         docker rmi ${DOCKER_REG}/${BUILD_REV_NAME}
     fi
 else
