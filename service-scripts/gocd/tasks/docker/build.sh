@@ -18,6 +18,9 @@ mkdir -p target/
 rm -f target/build.env
 for E in $(env);do
     echo export $(echo ${E} |sed -e 's/ /_/g') >> target/build.env
+    if [[ "${E}" == DBUILD_* ]];then
+      DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=$(echo ${E}|sed -e 's/DBUILD_//')"
+    fi
 done
 
 FROM_IMG_FILE=$(find ./target -name "*.image_name" |head -n1)
