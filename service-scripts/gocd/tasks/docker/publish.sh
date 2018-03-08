@@ -2,6 +2,10 @@
 echo ">> Publish"
 set -e
 
+: ${HOME_DIR:=/home}
+
+
+
 if [ -z ${DOCKER_REPO} ];then
     echo ">> Publish >>> Using ${DOCKER_REPO_DEFAULT} as DOCKER_REPO name"
     export DOCKER_REPO=${DOCKER_REPO_DEFAULT}
@@ -9,6 +13,8 @@ fi
 source /opt/service-scripts/gocd/helpers/gocd-functions.sh
 # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
 assemble_build_img_name
+source /opt/service-scripts/gocd/helpers/ucp.sh
+ucp_source_bundle
 
 if [[ $(basename $(pwd)) == "docker" ]];then
     ARTIFACTS_DIR=".."
