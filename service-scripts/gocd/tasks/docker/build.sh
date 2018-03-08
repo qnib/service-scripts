@@ -4,7 +4,11 @@ echo ">> BUILD"
 
 source /opt/service-scripts/gocd/helpers/gocd-functions.sh
 
-DOCKER_BUILD_OPTS="--no-cache"
+if [[ "X${DOCKER_NO_CACHE}" == "Xtrue" ]];then
+    DOCKER_BUILD_OPTS="--no-cache"
+else
+    DOCKER_BUILD_OPTS=""
+fi
 if [[ "X${DOCKER_FORCE_PULL}" == "Xtrue" ]];then
   DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --pull"
 fi
@@ -22,10 +26,18 @@ for E in $(env);do
       DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=$(echo ${E}|sed -e 's/DBUILD_//')"
     fi
 done
-
-FROM_IMG_FILE=$(find ./target -name "*.image_name" |head -n1)
-if [[ "X${FROM_IMG_FILE}" != "X" ]];then
-    DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=FROM_IMAGE_NAME=$(cat ${FROM_IMG_FILE} |awk -F/ '{print $NF}')"
+#### TODO: Put the vars in a set, so that they can be overwritten
+if [[ "X${FROM_IMG_NAME}" != "X" ]];then
+    DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=FROM_IMG_NAME=${FROM_IMG_NAME}"
+fi
+if [[ "X${FROM_IMG_TAG}" != "X" ]];then
+    DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=FROM_IMG_TAG=${FROM_IMG_TAG}"
+fi
+if [[ "X${DOCKER_REPO}" != "X" ]];then
+    DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=DOCKER_REPO=${DOCKER_REPO}"
+fi
+if [[ "X${DOCKER_REGISTRY}" != "X" ]];then
+    DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=DOCKER_REGISTRY=${DOCKER_REGISTRY}"
 fi
 
 if [ -d docker ];then

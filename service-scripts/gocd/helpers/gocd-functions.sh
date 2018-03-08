@@ -19,8 +19,12 @@ function assemble_build_img_name {
 
 function query_parent {
     # figure out information about the parent
-    export PREV_PIPELINE=$(echo ${GO_DEPENDENCY_LOCATOR_PARENTTRIGGER} |awk -F/ '{print $1}')
-    export QUERY_URL="${GO_SERVER_URL}/api/pipelines/${PREV_PIPELINE}/instance/${GO_DEPENDENCY_LABEL_PARENTTRIGGER}"
-    export PREV_REV=$(curl -s "${QUERY_URL}" |jq ".build_cause.material_revisions[0].modifications[0].revision" |tr -d '"')
-    echo ">> PREV_REV:${PREV_REV}"
+    for E in $(env);do
+        if [[ "${E}" == GO_DEPENDENCY_LOCATOR_* ]];then
+            export FROM_IMG_NAME=$(echo ${E} |awk -F= '{print $2}' |awk -F/ '{print $1}')
+        fi
+        if [[ "${E}" == GO_DEPENDENCY_LABEL_* ]];then
+            export FROM_IMG_TAG=${DOCKER_TAG}-rev$(echo ${E} |awk -F= '{print $2}')
+        fi
+    done
 }
