@@ -1,6 +1,7 @@
 #!/bin/bash
 
-export DOCKER_REPO=${DOCKER_REPO:-qnib}
+: ${DOCKER_REPO:=qnib}
+: ${DOCKER_TAG:=latest}
 
 function assemble_build_img_name {
     # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline

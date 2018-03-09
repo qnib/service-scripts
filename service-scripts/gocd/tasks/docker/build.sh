@@ -2,14 +2,19 @@
 set -e
 echo ">> BUILD"
 
+: ${DOCKER_NO_CACHE:=true}
+: ${DOCKER_FORCE_PULL:=true}
+: ${DOCKER_REPO:=qnib}
+: ${DOCKER_REGISTRY:=docker.io}
+
 source /opt/service-scripts/gocd/helpers/gocd-functions.sh
 
-if [[ "X${DOCKER_NO_CACHE}" == "Xtrue" ]];then
+if [[ "${DOCKER_NO_CACHE}" == "true" ]];then
     DOCKER_BUILD_OPTS="--no-cache"
 else
     DOCKER_BUILD_OPTS=""
 fi
-if [[ "X${DOCKER_FORCE_PULL}" == "Xtrue" ]];then
+if [[ "${DOCKER_FORCE_PULL}" == "true" ]];then
   DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --pull"
 fi
 

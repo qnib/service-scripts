@@ -3,7 +3,7 @@ echo ">> Publish"
 set -e
 
 : ${HOME_DIR:=/home}
-
+: ${SKIP_TAG_LATEST:=false}
 
 
 if [ -z ${DOCKER_REPO} ];then
@@ -14,6 +14,7 @@ source /opt/service-scripts/gocd/helpers/gocd-functions.sh
 # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
 assemble_build_img_name
 source /opt/service-scripts/gocd/helpers/ucp.sh
+echo ">> Do we bundle?"
 ucp_source_bundle
 
 if [[ $(basename $(pwd)) == "docker" ]];then
@@ -22,7 +23,7 @@ else
     ARTIFACTS_DIR="."
 fi
 mkdir -p ${ARTIFACTS_DIR}/target/
-if [ "X${SKIP_TAG_LATEST}" != "Xtrue" ];then
+if [ "${SKIP_TAG_LATEST}" == "false" ];then
     echo ">> Publish >>> Tag image with '${DOCKER_TAG}': docker tag ${BUILD_IMG_NAME} ${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}"
     docker tag ${BUILD_IMG_NAME} ${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}
     if [ "X${DOCKER_REG}" != "X" ];then
