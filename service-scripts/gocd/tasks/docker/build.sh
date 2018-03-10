@@ -1,10 +1,7 @@
 #!/bin/bash
-set -xe
-echo "#########################"
-env |sort
-echo "#########################"
-echo ">> BUILD"
+set -e
 
+echo ">> BUILD"
 : ${DOCKER_NO_CACHE:=true}
 : ${DOCKER_FORCE_PULL:=true}
 : ${DOCKER_REPO:=qnib}
