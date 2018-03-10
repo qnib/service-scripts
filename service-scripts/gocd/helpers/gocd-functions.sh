@@ -2,7 +2,7 @@
 
 : ${DOCKER_REPO:=qnib}
 : ${DOCKER_TAG:=latest}
-: ${FROM_DOCKER_TAG:=latest}
+: ${FROM_IMG_TAG:=latest}
 
 function assemble_build_img_name {
     # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
@@ -29,15 +29,19 @@ function assemble_build_img_name {
 
 function query_parent {
     # figure out information about the parent
+    set -x
     for E in $(env);do
         if [[ "${E}" == GO_DEPENDENCY_LOCATOR_* ]];then
             export FROM_IMG_NAME=$(echo ${E} |awk -F= '{print $2}' |awk -F/ '{print $1}')
-        fi
-        if [[ "$(echo ${FROM_IMG_NAME} |awk -F\. '{print NF-1}')" != 0 ]];then
-          FROM_DOCKER_TAG=$(echo ${FROM_IMG_NAME} |cut -d'.' -f 2-)
+            if [[ "$(echo ${FROM_IMG_NAME} |awk -F\. '{print NF-1}')" != 0 ]];then
+              FROM_IMG_TAG=$(echo ${FROM_IMG_NAME} |cut -d'.' -f 2-)
+              echo ">>> Derived FROM_IMG_TAG '${FROM_IMG_TAG}' from FROM_IMG_NAME: ${FROM_IMG_NAME}"
+            fi
         fi
         if [[ "${E}" == GO_DEPENDENCY_LABEL_* ]];then
-            export FROM_IMG_TAG=${FROM_DOCKER_TAG}-rev$(echo ${E} |awk -F= '{print $2}')
+            export FROM_IMG_TAG=${FROM_IMG_TAG}-rev$(echo ${E} |awk -F= '{print $2}')
+            echo ">>> Label added to FROM_IMG_TAG: ${FROM_IMG_TAG}"
         fi
     done
+    set +x
 }
