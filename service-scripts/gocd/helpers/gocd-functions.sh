@@ -2,6 +2,7 @@
 
 : ${DOCKER_REPO:=qnib}
 : ${DOCKER_TAG:=latest}
+: ${FROM_DOCKER_TAG:=latest}
 
 function assemble_build_img_name {
     # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
@@ -11,6 +12,7 @@ function assemble_build_img_name {
       if [[ "X${IMG_TAG}" != "X" ]];then
         echo  ">> GO_PIPELINE_NAME: ${GO_PIPELINE_NAME} carries tag '${IMG_TAG}'"
         DOCKER_TAG=${IMG_TAG}
+        IMG_NAME=$(echo ${GO_PIPELINE_NAME} |cut -d'.' -f 1)
       fi
     fi
     if [ ! -z ${GO_REVISION} ];then
@@ -31,8 +33,11 @@ function query_parent {
         if [[ "${E}" == GO_DEPENDENCY_LOCATOR_* ]];then
             export FROM_IMG_NAME=$(echo ${E} |awk -F= '{print $2}' |awk -F/ '{print $1}')
         fi
+        if [[ "$(echo ${FROM_IMG_NAME} |awk -F\. '{print NF-1}')" != 0 ]];then
+          FROM_DOCKER_TAG=$(echo ${FROM_IMG_NAME} |cut -d'.' -f 2-)
+        fi
         if [[ "${E}" == GO_DEPENDENCY_LABEL_* ]];then
-            export FROM_IMG_TAG=${DOCKER_TAG}-rev$(echo ${E} |awk -F= '{print $2}')
+            export FROM_IMG_TAG=${FROM_DOCKER_TAG}-rev$(echo ${E} |awk -F= '{print $2}')
         fi
     done
 }

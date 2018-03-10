@@ -4,7 +4,7 @@ set -e
 
 : ${HOME_DIR:=/home}
 : ${SKIP_TAG_LATEST:=false}
-
+: ${DOCKER_TAG_REV:=true}
 
 if [ -z ${DOCKER_REPO} ];then
     echo ">> Publish >>> Using ${DOCKER_REPO_DEFAULT} as DOCKER_REPO name"
@@ -39,7 +39,7 @@ else
    echo ">> PUBLISH >>> Skip tagging the build as ${DOCKER_TAG}"
 fi
 
-if [ "X${DOCKER_TAG_REV}" == "Xtrue" ];then
+if [ "${DOCKER_TAG_REV}" == "true" ];then
     BUILD_REV_NAME="${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}-rev${GO_PIPELINE_COUNTER}"
     echo ">> Publish >>> Tag image locally with build revision: docker tag/push/rmi ${BUILD_REV_NAME}"
     docker tag ${BUILD_IMG_NAME} ${BUILD_REV_NAME}

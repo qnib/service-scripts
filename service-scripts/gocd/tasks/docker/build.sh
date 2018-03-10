@@ -6,6 +6,7 @@ echo ">> BUILD"
 : ${DOCKER_FORCE_PULL:=true}
 : ${DOCKER_REPO:=qnib}
 : ${DOCKER_REGISTRY:=docker.io}
+: ${DOCKER_FILE:=Dockerfile}
 
 source /opt/service-scripts/gocd/helpers/ucp.sh
 ucp_source_bundle
@@ -26,6 +27,7 @@ assemble_build_img_name
 
 # figure out information about the parent
 query_parent
+
 mkdir -p target/
 rm -f target/build.env
 for E in $(env);do
@@ -39,6 +41,9 @@ if [[ "X${FROM_IMG_REGISTRY}" != "X" ]];then
     DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=FROM_IMG_REGISTRY=${FROM_IMG_REGISTRY}"
 fi
 if [[ "X${FROM_IMG_NAME}" != "X" ]];then
+    if [[ "$(echo ${FROM_IMG_NAME} |awk -F\. '{print NF-1}')" != 0 ]];then
+      FROM_IMG_NAME=$(echo ${FROM_IMG_NAME} |cut -d'.' -f 1)
+    fi
     DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=FROM_IMG_NAME=${FROM_IMG_NAME}"
 fi
 if [[ "X${FROM_IMG_TAG}" != "X" ]];then
@@ -73,4 +78,4 @@ else
 fi
 
 echo ">> BUILD >>> Build Dockerfile: docker build ${DOCKER_BUILD_OPTS} -t ${BUILD_IMG_NAME} ."
-docker build ${DOCKER_BUILD_OPTS} -t ${BUILD_IMG_NAME} .
+docker build ${DOCKER_BUILD_OPTS} -t ${BUILD_IMG_NAME} -f ${DOCKER_FILE} .
