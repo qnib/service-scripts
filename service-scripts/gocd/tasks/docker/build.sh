@@ -1,11 +1,17 @@
 #!/bin/bash
-set -e
+set -xe
+echo "#########################"
+env |sort
+echo "#########################"
 echo ">> BUILD"
 
 : ${DOCKER_NO_CACHE:=true}
 : ${DOCKER_FORCE_PULL:=true}
 : ${DOCKER_REPO:=qnib}
 : ${DOCKER_REGISTRY:=docker.io}
+
+source /opt/service-scripts/gocd/helpers/ucp.sh
+ucp_source_bundle
 
 source /opt/service-scripts/gocd/helpers/gocd-functions.sh
 
@@ -32,6 +38,9 @@ for E in $(env);do
     fi
 done
 #### TODO: Put the vars in a set, so that they can be overwritten
+if [[ "X${FROM_IMG_REGISTRY}" != "X" ]];then
+    DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=FROM_IMG_REGISTRY=${FROM_IMG_REGISTRY}"
+fi
 if [[ "X${FROM_IMG_NAME}" != "X" ]];then
     DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=FROM_IMG_NAME=${FROM_IMG_NAME}"
 fi

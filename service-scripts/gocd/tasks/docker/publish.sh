@@ -14,7 +14,6 @@ source /opt/service-scripts/gocd/helpers/gocd-functions.sh
 # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
 assemble_build_img_name
 source /opt/service-scripts/gocd/helpers/ucp.sh
-echo ">> Do we bundle?"
 ucp_source_bundle
 
 if [[ $(basename $(pwd)) == "docker" ]];then

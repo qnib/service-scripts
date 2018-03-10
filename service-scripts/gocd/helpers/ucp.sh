@@ -6,5 +6,7 @@ function ucp_source_bundle {
     pushd ${HOME_DIR}/${UCP_USER}/bundle/ >/dev/null
     source env.sh
     popd >/dev/null
+  else
+    echo "[!!] Could not find '${HOME_DIR}/${UCP_USER}/bundle/env.sh'"
   fi
 }

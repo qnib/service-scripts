@@ -6,6 +6,13 @@
 function assemble_build_img_name {
     # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
     export IMG_NAME=$(echo ${GO_PIPELINE_NAME} |awk -F'[\_\.]' '{print $1}')
+    if [[ "$(echo ${GO_PIPELINE_NAME} |awk -F\. '{print NF-1}')" != 0 ]];then
+      IMG_TAG=$(echo ${GO_PIPELINE_NAME} |cut -d'.' -f 2-)
+      if [[ "X${IMG_TAG}" != "X" ]];then
+        echo  ">> GO_PIPELINE_NAME: ${GO_PIPELINE_NAME} carries tag '${IMG_TAG}'"
+        DOCKER_TAG=${IMG_TAG}
+      fi
+    fi
     if [ ! -z ${GO_REVISION} ];then
         export BUILD_IMG_NAME="${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}-${GO_REVISION}-rev${GO_PIPELINE_COUNTER}"
     elif [ ! -z ${GO_REVISION_DOCKER} ];then
