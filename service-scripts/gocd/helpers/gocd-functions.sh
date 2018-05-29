@@ -29,12 +29,12 @@ function assemble_build_img_name {
 
 function query_parent {
     # figure out information about the parent
-    set -x
     for E in $(env);do
         if [[ "${E}" == GO_DEPENDENCY_LOCATOR_* ]];then
-            export FROM_IMG_NAME=$(echo ${E} |awk -F= '{print $2}' |awk -F/ '{print $1}')
+            FROM_IMG_NAME=$(echo ${E} |awk -F= '{print $2}' |awk -F/ '{print $1}')
             if [[ "$(echo ${FROM_IMG_NAME} |awk -F\. '{print NF-1}')" != 0 ]];then
               FROM_IMG_TAG=$(echo ${FROM_IMG_NAME} |cut -d'.' -f 2-)
+              FROM_IMG_NAME=$(echo ${FROM_IMG_NAME} |cut -d'.' -f 1)
               echo ">>> Derived FROM_IMG_TAG '${FROM_IMG_TAG}' from FROM_IMG_NAME: ${FROM_IMG_NAME}"
             fi
         fi
@@ -43,5 +43,4 @@ function query_parent {
             echo ">>> Label added to FROM_IMG_TAG: ${FROM_IMG_TAG}"
         fi
     done
-    set +x
 }

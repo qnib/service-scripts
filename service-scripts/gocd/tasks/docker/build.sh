@@ -63,19 +63,19 @@ if [[ -d deploy/docker/ ]];then
     rsync -aP deploy/docker/. .
 fi
 
-echo ">> BUILD >>> Add DOCKER_REG to Dockerfile"
-REG_IMG_NAME=$(grep ^FROM Dockerfile | awk '{print $2}')
-if [ $(echo ${REG_IMG_NAME} | grep -o "/" | wc -l) -gt 1 ];then
-    echo ">> BUILD >>>> Sure you wanna add the registry? Looks not right: ${REG_IMG_NAME}"
-elif [ $(echo ${REG_IMG_NAME} | grep -o "/" | wc -l) -eq 0 ];then
-    echo ">> BUILD >>>> Image is an official one, so we skip it '${REG_IMG_NAME}'"
-else
-    if [ "X${DOCKER_REG}" != "X" ];then
-        cat Dockerfile |sed -e "s;FROM.*;FROM ${DOCKER_REG}/${REG_IMG_NAME};" > Dockerfile.new
-        mv Dockerfile.new Dockerfile
-        docker pull ${DOCKER_REG}/${REG_IMG_NAME}
-     fi
-fi
+#echo ">> BUILD >>> Add DOCKER_REG to Dockerfile"
+#REG_IMG_NAME=$(grep ^FROM Dockerfile | awk '{print $2}')
+#if [ $(echo ${REG_IMG_NAME} | grep -o "/" | wc -l) -gt 1 ];then
+#    echo ">> BUILD >>>> Sure you wanna add the registry? Looks not right: ${REG_IMG_NAME}"
+#elif [ $(echo ${REG_IMG_NAME} | grep -o "/" | wc -l) -eq 0 ];then
+#    echo ">> BUILD >>>> Image is an official one, so we skip it '${REG_IMG_NAME}'"
+#else
+#    if [ "X${DOCKER_REG}" != "X" ];then
+#        cat Dockerfile |sed -e "s;FROM.*;FROM ${DOCKER_REG}/${REG_IMG_NAME};" > Dockerfile.new
+#        mv Dockerfile.new Dockerfile
+#        docker pull ${DOCKER_REG}/${REG_IMG_NAME}
+#     fi
+#fi
 
 echo ">> BUILD >>> Build Dockerfile: docker build ${DOCKER_BUILD_OPTS} -t ${BUILD_IMG_NAME} ."
 docker build ${DOCKER_BUILD_OPTS} -t ${BUILD_IMG_NAME} -f ${DOCKER_FILE} .
