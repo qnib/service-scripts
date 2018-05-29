@@ -4,6 +4,7 @@ set -e
 echo ">> BUILD"
 : ${DOCKER_NO_CACHE:=true}
 : ${DOCKER_FORCE_PULL:=true}
+: ${DOCKER_SQUASH:=false}
 : ${DOCKER_REPO:=qnib}
 : ${DOCKER_REGISTRY:=docker.io}
 : ${DOCKER_FILE:=Dockerfile}
@@ -20,6 +21,10 @@ else
 fi
 if [[ "${DOCKER_FORCE_PULL}" == "true" ]];then
   DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --pull"
+fi
+
+if [[ "${DOCKER_SQUASH}" == "true" ]];then
+  DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --squash"
 fi
 
 # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
