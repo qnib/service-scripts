@@ -1,4 +1,5 @@
 #!/bin/bash
+: ${HOME_DIR:="/home"}
 
 function ucp_source_bundle {
   if [[ "X${HOME_DIR}" != "X" ]] && [[ -f "${HOME_DIR}/${UCP_USER}/bundle/env.sh" ]];then
