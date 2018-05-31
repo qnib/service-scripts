@@ -8,6 +8,7 @@ echo ">> BUILD"
 : ${DOCKER_REPO:=qnib}
 : ${DOCKER_REGISTRY:=docker.io}
 : ${DOCKER_FILE:=Dockerfile}
+: ${DOCKER_BUILD_LOCAL:=false}
 
 source /opt/service-scripts/gocd/helpers/ucp.sh
 ucp_source_bundle
@@ -25,6 +26,10 @@ fi
 
 if [[ "${DOCKER_SQUASH}" == "true" ]];then
   DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --squash"
+fi
+
+if [[ "${DOCKER_BUILD_LOCAL}" == "true" ]];then
+  DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg constraint:node==$(hostname)"
 fi
 
 # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
