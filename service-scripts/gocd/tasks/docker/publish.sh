@@ -28,7 +28,13 @@ if [ "${SKIP_TAG_LATEST}" == "false" ];then
     if [ "X${DOCKER_REG}" != "X" ];then
       echo ">> Publish >>> Push image to ${DOCKER_REG}: docker tag/push/rmi ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}"
       docker tag ${BUILD_IMG_NAME} ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}
+      set +e
       docker push ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}
+      if [[ $? -ne 0 ]];then
+        echo "[!!] Push failed "
+        exit 1
+      fi
+      set -e
       BUILD_IMG_REPODIGEST=$(docker inspect -f '{{(index .RepoDigests 0) }}' ${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG} |awk -F\@ '{print $2}')
       IMG_FULL_NAME="${DOCKER_REG}/${DOCKER_REPO}/${IMG_NAME}:${DOCKER_TAG}@${BUILD_IMG_REPODIGEST}"
       echo ">> Full name of image: ${IMG_FULL_NAME}"
