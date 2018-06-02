@@ -29,7 +29,7 @@ if [[ "${DOCKER_SQUASH}" == "true" ]];then
 fi
 
 if [[ "${DOCKER_BUILD_LOCAL}" == "true" ]];then
-  DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg constraint:node==$(hostname)"
+  DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg constraint:node==$(docker info -f '{{.Name}}')"
 fi
 
 # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
