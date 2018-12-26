@@ -9,6 +9,7 @@ echo ">> BUILD"
 : ${DOCKER_REGISTRY:=docker.io}
 : ${DOCKER_FILE:=Dockerfile}
 : ${DOCKER_BUILD_LOCAL:=false}
+: ${DOCKER_CONTEXT:=.}
 
 source /opt/service-scripts/gocd/helpers/ucp.sh
 ucp_source_bundle
@@ -65,8 +66,11 @@ fi
 if [[ "X${DOCKER_REGISTRY}" != "X" ]];then
     DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=DOCKER_REGISTRY=${DOCKER_REGISTRY}"
 fi
-
+if [[ "X${DOCKER_FILE}" != "X" ]];then
+    DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} -f=${DOCKER_FILE}"
+fi
 if [ -d docker ];then
+    echo ">> Change dir to docker"
     cd docker
 fi
 if [[ -d deploy/docker/ ]];then
@@ -86,6 +90,6 @@ fi
 #        docker pull ${DOCKER_REG}/${REG_IMG_NAME}
 #     fi
 #fi
-
-echo ">> BUILD >>> Build Dockerfile: docker build ${DOCKER_BUILD_OPTS} -t ${BUILD_IMG_NAME} ."
-docker build ${DOCKER_BUILD_OPTS} -t ${BUILD_IMG_NAME} -f ${DOCKER_FILE} .
+echo ">> PWD: $(pwd)"
+echo ">> BUILD >>> Build Dockerfile: docker build ${DOCKER_BUILD_OPTS} -t ${BUILD_IMG_NAME} ${DOCKER_CONTEXT}"
+docker build ${DOCKER_BUILD_OPTS} -t ${BUILD_IMG_NAME} ${DOCKER_CONTEXT}
