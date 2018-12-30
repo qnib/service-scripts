@@ -13,12 +13,12 @@ fi
 source /opt/service-scripts/gocd/helpers/gocd-functions.sh
 # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
 assemble_build_img_name
-if [[ "X${DOCKER_REG}" != "X" && "X${DOCKER_REGISTRY_PASSWD}" != "X" && "X${DOCKER_REGISTRY_USER}" != "X" ]];then
-  docker login -u ${DOCKER_REGISTRY_USER} -p ${DOCKER_REGISTRY_PASSWD} ${DOCKER_REG}
+if [[ ${DOCKER_USE_LOGIN} == "true" ]];then
+  docker_login
 else
-  source /opt/service-scripts/gocd/helpers/ucp.sh
   ucp_source_bundle
 fi
+
 if [[ $(basename $(pwd)) == "docker" ]];then
     ARTIFACTS_DIR=".."
 else

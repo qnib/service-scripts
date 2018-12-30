@@ -14,3 +14,11 @@ function ucp_source_bundle {
     echo "[!!] Could not find '${HOME_DIR}/${UCP_USER}/bundle/env.sh'"
   fi
 }
+
+function docker_login {
+  if [[ "X${DOCKER_REGISTRY}" != "X" ]] && [[ "X${DOCKER_USER}" != "X" ]] && [[ -f "/run/secrets/${DOCKER_REGISTRY}/${DOCKER_USER/password" ]];then
+      docker login ${DOCKER_REGISTRY} --username ${DOCKER_USER} --password $(cat "/run/secrets/${DOCKER_REGISTRY}/${DOCKER_USER/password")
+  else
+      echo "[EE] Please provide DOCKER_REGISTRY, DOCKER_USER and mount the password/token to /run/secrets/DOCKER_REGISTRY/DOCKER_USER/password"
+  fi
+}

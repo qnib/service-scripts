@@ -10,10 +10,14 @@ echo ">> BUILD"
 : ${DOCKER_FILE:=Dockerfile}
 : ${DOCKER_BUILD_LOCAL:=false}
 : ${DOCKER_CONTEXT:=.}
+: ${DOCKER_USE_LOGIN:=false}
 
 source /opt/service-scripts/gocd/helpers/ucp.sh
-ucp_source_bundle
-
+if [[ ${DOCKER_USE_LOGIN} == "true" ]];then
+  docker_login
+else
+  ucp_source_bundle
+fi
 source /opt/service-scripts/gocd/helpers/gocd-functions.sh
 
 if [[ "${DOCKER_NO_CACHE}" == "true" ]];then
@@ -29,7 +33,7 @@ if [[ "${DOCKER_SQUASH}" == "true" ]];then
   DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --squash"
 fi
 
-if [[ "${DOCKER_BUILD_LOCAL}" == "true" ]];then
+if [[ "${DOCKER_BUILD_LOCAL}" == "true" ]] && [[ "${DOCKER_NO_CACHE}" != "true" ]];then
   DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg constraint:node==$(cat ~/docker-node)"
 fi
 
