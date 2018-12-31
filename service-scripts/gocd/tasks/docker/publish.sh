@@ -13,6 +13,7 @@ fi
 source /opt/service-scripts/gocd/helpers/gocd-functions.sh
 # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
 assemble_build_img_name
+source /opt/service-scripts/gocd/helpers/ucp.sh
 if [[ ${DOCKER_USE_LOGIN} == "true" ]];then
   docker_login
 else
