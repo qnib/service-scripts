@@ -25,7 +25,7 @@ for x in $(env |sort -r |grep GO_DEPENDENCY);do
     echo ">> DEPENDENCY_VAR: ${DEPENDENCY_VAR}"
     DEPENDENCY_PIPE_NAME=$(echo ${DEPENDENCY_VAR} | awk -F/ '{print $1}')
     echo ">> DEPENDENCY_PIPE_NAME: ${DEPENDENCY_PIPE_NAME}"
-    if [[ $(echo ${DEPENDENCY_PIPE_NAME} |awk -F. '{print NF-1}') -gt 1 ]];then
+    if [[ $(echo ${DEPENDENCY_PIPE_NAME} |awk -F. '{print NF-1}') -ge 1 ]];then
       DEPENDENCY_TAG_NAME=$(echo ${DEPENDENCY_PIPE_NAME} |cut -d\. -f 2-)
       DEPENDENCY_DOCKER_IMAGE=$(echo ${DEPENDENCY_PIPE_NAME} | awk -F\. '{print $1}')
     else
