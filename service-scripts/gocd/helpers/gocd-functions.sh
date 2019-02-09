@@ -31,10 +31,10 @@ function query_parent {
     # figure out information about the parent
     for E in $(env);do
         if [[ "${E}" == GO_DEPENDENCY_LOCATOR_* ]];then
-            FROM_IMG_NAME=$(echo ${E} |awk -F= '{print $2}' |awk -F/ '{print $1}')
+            export FROM_IMG_NAME=$(echo ${E} |awk -F= '{print $2}' |awk -F/ '{print $1}')
             if [[ "$(echo ${FROM_IMG_NAME} |awk -F\. '{print NF-1}')" != 0 ]];then
-              FROM_IMG_TAG=$(echo ${FROM_IMG_NAME} |cut -d'.' -f 2-)
-              FROM_IMG_NAME=$(echo ${FROM_IMG_NAME} |cut -d'.' -f 1)
+              export FROM_IMG_TAG=$(echo ${FROM_IMG_NAME} |cut -d'.' -f 2-)
+              export FROM_IMG_NAME=$(echo ${FROM_IMG_NAME} |cut -d'.' -f 1)
               echo ">>> Derived FROM_IMG_TAG '${FROM_IMG_TAG}' from FROM_IMG_NAME: ${FROM_IMG_NAME}"
             fi
         fi

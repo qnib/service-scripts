@@ -43,7 +43,7 @@ for x in $(env |sort -r |grep GO_DEPENDENCY);do
     DEPENDENCY_IMAGE_NAME=$(eval echo "${DEPENDENCY_IMAGE_NAME}-rev\$$DEPENDENCY_BUILD_TAG_NAME")
     echo ">> DEPENDENCY_IMAGE_NAME: ${DEPENDENCY_IMAGE_NAME}"
     docker pull ${DEPENDENCY_IMAGE_NAME}
-    DEPENDENCY_FEATURES=$(docker image inspect ${DEPENDENCY_IMAGE_NAME}|jq -r '.[] |.Config.Labels["org.qnib.image.node.features"]')
+    DEPENDENCY_FEATURES=$(docker image inspect ${DEPENDENCY_IMAGE_NAME}|jq -r '.[] |.Config.Labels["platform.features"]')
     echo ">> DEPENDENCY_FEATURES: ${DEPENDENCY_FEATURES}"
     echo "  -" |tee -a manifest.yml
     echo "    image: ${DEPENDENCY_IMAGE_NAME}" |tee -a manifest.yml
@@ -52,7 +52,9 @@ for x in $(env |sort -r |grep GO_DEPENDENCY);do
     echo "      os: linux" |tee -a manifest.yml
     if [[ "X${DEPENDENCY_FEATURES}" != "Xnull" ]];then
       echo "      features:" |tee -a manifest.yml
-      echo "        - ${DEPENDENCY_FEATURES}" |tee -a manifest.yml
+      for DEPENDENCY_FEATURE in $(echo ${DEPENDENCY_FEATURES} |sed -e 's/,/ /g');do
+        echo "        - ${DEPENDENCY_FEATURE}" |tee -a manifest.yml
+      done
     fi
   fi
 done

@@ -11,6 +11,8 @@ echo ">> BUILD"
 : ${DOCKER_BUILD_LOCAL:=false}
 : ${DOCKER_CONTEXT:=.}
 : ${DOCKER_USE_LOGIN:=false}
+: ${DOCKER_EXTEND_PLATFORM_FEATURE:=false}
+
 
 source /opt/service-scripts/gocd/helpers/ucp.sh
 if [[ ${DOCKER_USE_LOGIN} == "true" ]];then
@@ -48,9 +50,15 @@ rm -f target/build.env
 for E in $(env);do
     echo export $(echo ${E} |sed -e 's/ /_/g') >> target/build.env
     if [[ "${E}" == DBUILD_* ]];then
-      DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=$(echo ${E}|sed -e 's/DBUILD_//')"
+      KV_PAIR=$(echo ${E}|sed -e 's/DBUILD_//')
+      DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=${KV_PAIR}"
+      KEY=$(echo ${KV_PAIR} |cut -d\= -f 1)
+      VALUE=$(echo ${KV_PAIR} |cut -d\= -f 2-)
+      echo ">> declare ${KEY}=${VALUE}"
+      declare ${KEY}=${VALUE}
     fi
 done
+
 #### TODO: Put the vars in a set, so that they can be overwritten
 if [[ "X${FROM_IMG_REGISTRY}" != "X" ]];then
     DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=FROM_IMG_REGISTRY=${FROM_IMG_REGISTRY}"
@@ -79,6 +87,47 @@ if [ -d docker ];then
 fi
 if [[ -d deploy/docker/ ]];then
     rsync -aP deploy/docker/. .
+fi
+
+#### Figure out FROM_IMG_* to eval name at the end
+
+if [[ "X${FROM_IMG_REPO}" == "X" ]];then
+    FROM_IMG_REPO=$(grep '^ARG FROM_IMG_REPO=' ${DOCKER_FILE} | cut -d\= -f 2 |sed -e 's/\"//g')
+    echo ">> Derived FROM_IMG_REPO via Dockerfile: ${FROM_IMG_REPO}"
+fi
+if [[ "X${FROM_IMG_NAME}" == "X" ]];then
+    FROM_IMG_NAME=$(grep '^ARG FROM_IMG_NAME=' ${DOCKER_FILE} | cut -d\= -f 2 |sed -e 's/\"//g')
+    echo ">> Derived FROM_IMG_NAME via Dockerfile: ${FROM_IMG_NAME}"
+fi
+if [[ "X${FROM_IMG_TAG}" == "X" ]];then
+    FROM_IMG_TAG=$(grep '^ARG FROM_IMG_TAG=' ${DOCKER_FILE} | cut -d\= -f 2 |sed -e 's/\"//g')
+    echo ">> Derived FROM_IMG_TAG via Dockerfile: ${FROM_IMG_TAG}"
+fi
+
+#### Figure out FROM statement that creates the output image
+if [[ "X${DOCKER_EXTEND_PLATFORM_FEATURE}" == "Xtrue" ]];then
+  DFILE_FROM_IMAGE=$(grep '^FROM' ${DOCKER_FILE} | grep -v ' AS ' |tail -n1 |sed -e 's/^FROM\ //g')
+
+  if [[ "X${DFILE_FROM_IMAGE}" == "X" ]];then
+    echo ">> ERROR: Could not find FROM statement in Dockerfile without AS condition"
+    exit 1
+  fi
+  echo ">> Found FROM: ${DFILE_FROM_IMAGE}"
+  EVAL_FROM_NAME="echo ${DFILE_FROM_IMAGE}"
+  DFILE_FROM_IMAGE=$(eval ${EVAL_FROM_NAME})
+  echo ">> FROM after eval: ${DFILE_FROM_IMAGE}"
+  echo ">> Download FROM image: ${DFILE_FROM_IMAGE})"
+  docker pull ${DFILE_FROM_IMAGE}
+  echo ">> Check for platform.features label in ${DFILE_FROM_IMAGE}"
+  PFEATURE_PRE=$(docker image inspect ${DFILE_FROM_IMAGE} |jq -r '.[0] | .ContainerConfig.Labels["platform.features"]')
+  if [[ "X{$PFEATURE_PRE}" != 'X<no value>' ]] && [[ "X{$PFEATURE_PRE}" != 'X' ]];then
+    echo ">> Found platform.features: ${PFEATURE_PRE}"
+    if [[ "X${PLATFORM_FEATURES}" != "X" ]];then
+      NEW_PLATFORM_FEATURES=$(echo "${PFEATURE_PRE},${PLATFORM_FEATURES}" |sed -e 's/,/ /g'|xargs -n1 |sort -u |xargs |sed -e 's/ /,/g')
+      echo ">> Extend platform.features with '${PLATFORM_FEATURES}' to: '${NEW_PLATFORM_FEATURES}'"
+      DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --label platform.features=${NEW_PLATFORM_FEATURES}"
+    fi
+  fi
 fi
 
 #echo ">> BUILD >>> Add DOCKER_REG to Dockerfile"
