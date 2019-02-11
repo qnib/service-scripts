@@ -128,6 +128,10 @@ if [[ "X${DOCKER_EXTEND_PLATFORM_FEATURE}" == "Xtrue" ]];then
       DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --label platform.features=${NEW_PLATFORM_FEATURES}"
     fi
   fi
+  if [[ "X${CFLAG_MARCH}" == "X" ]];then
+    CFLAG_MARCH=$(docker image inspect ${DFILE_FROM_IMAGE} |jq -r '.[0] | .ContainerConfig.Labels["cflag.march"]')
+    DOCKER_BUILD_OPTS="${DOCKER_BUILD_OPTS} --build-arg=CFLAG_MARCH=${CFLAG_MARCH}"
+  fi
 fi
 
 #echo ">> BUILD >>> Add DOCKER_REG to Dockerfile"
