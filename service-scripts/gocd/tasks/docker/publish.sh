@@ -6,6 +6,7 @@ set -e
 : ${SKIP_TAG_LATEST:=false}
 : ${DOCKER_TAG_REV:=true}
 : ${DOCKER_REMOVE_IMAGES:=true}
+: ${DOCKER_BUILD_TARGETS:=false}
 
 if [ -z ${DOCKER_REPO} ];then
     echo ">> Publish >>> Using ${DOCKER_REPO_DEFAULT} as DOCKER_REPO name"
@@ -101,7 +102,7 @@ else
 fi
 
 ## Push targets
-if [[ "${DOCKER_BUILD_TARGETS}" == "false" ]];then
+if [[ "${DOCKER_BUILD_TARGETS}" != "true" ]];then
   echo ">> Skip creating target images: DOCKER_BUILD_TARGETS==false"
   exit 0
 fi

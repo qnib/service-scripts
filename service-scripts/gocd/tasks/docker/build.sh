@@ -144,7 +144,7 @@ if [[ "${DOCKER_BUILD_TARGETS}" == "true" ]];then
   echo ">> Targets to build: ${DFILE_TARGETS}"
   for DFILE_TARGET in $(echo ${DFILE_TARGETS} |sed -e 's/:/ /g');do
     assemble_target_img_name ${DFILE_TARGET}
-    echo ">> BUILD >>> Build Dockerfile: docker build ${DOCKER_BUILD_OPTS} --target=${DFILE_TARGET} -t ${BUILD_IMG_NAME} ${DOCKER_CONTEXT}"
-    docker build ${DOCKER_BUILD_OPTS} --target=${DFILE_TARGET} -t ${BUILD_IMG_NAME} ${DOCKER_CONTEXT}
+    echo ">> BUILD >>> Build Dockerfile: docker build ${DOCKER_BUILD_OPTS} --target=${DFILE_TARGET} -t ${TARGET_IMG_NAME} ${DOCKER_CONTEXT}"
+    docker build ${DOCKER_BUILD_OPTS} --target=${DFILE_TARGET} -t ${TARGET_IMG_NAME} ${DOCKER_CONTEXT}
   done
 fi
