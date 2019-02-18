@@ -5,7 +5,8 @@ echo ">> RUN"
 : ${DOCKER_REPO:=qnib}
 : ${DOCKER_REGISTRY:=docker.io}
 : ${DOCKER_USE_LOGIN:=false}
-
+: ${DOCKER_REGISTRY_INSECURE:=false}
+: ${MANIFESTTOOL_OPTS}
 source /opt/service-scripts/gocd/helpers/ucp.sh
 if [[ ${DOCKER_USE_LOGIN} == "true" ]];then
   docker_login
@@ -13,6 +14,11 @@ else
   ucp_source_bundle
 fi
 source /opt/service-scripts/gocd/helpers/gocd-functions.sh
+
+
+if [[ "${DOCKER_REGISTRY_INSECURE}" == "true" ]];then
+  MANIFESTTOOL_OPTS="${MANIFESTTOOL_OPTS} --insecure"
+fi
 
 # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
 assemble_build_img_name
@@ -61,6 +67,6 @@ done
 echo ">> Manifest to be pushed"
 cat manifest.yml
 echo ">> manifest-tool push from-spec manifest.yml"
-manifest-tool push from-spec manifest.yml
+manifest-tool ${MANIFESTTOOL_OPTS} push from-spec manifest.yml
 echo ">> manifest-tool inspect ${DOCKER_REGISTRY}/${BUILD_IMG_NAME}"
-manifest-tool inspect ${DOCKER_REGISTRY}/${BUILD_IMG_NAME}
+manifest-tool ${MANIFESTTOOL_OPTS} inspect ${DOCKER_REGISTRY}/${BUILD_IMG_NAME}

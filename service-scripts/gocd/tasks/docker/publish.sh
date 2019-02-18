@@ -3,11 +3,16 @@ echo ">> Publish"
 set -e
 
 : ${HOME_DIR:=/home}
+: ${DOCKER_PUSH_DISABLE:=false}
 : ${SKIP_TAG_LATEST:=false}
 : ${DOCKER_TAG_REV:=true}
 : ${DOCKER_REMOVE_IMAGES:=true}
 : ${DOCKER_BUILD_TARGETS:=false}
 
+if [[ "${DOCKER_PUSH_DISABLE}" == "true" ]];then
+  echo ">> Push disabled by DOCKER_PUSH_DISABLE==true"
+  exit 0
+fi
 if [ -z ${DOCKER_REPO} ];then
     echo ">> Publish >>> Using ${DOCKER_REPO_DEFAULT} as DOCKER_REPO name"
     export DOCKER_REPO=${DOCKER_REPO_DEFAULT}
