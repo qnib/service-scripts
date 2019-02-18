@@ -6,7 +6,6 @@ echo ">> BUILD"
 : ${DOCKER_FORCE_PULL:=true}
 : ${DOCKER_SQUASH:=false}
 : ${DOCKER_REPO:=qnib}
-: ${DOCKER_REGISTRY:=docker.io}
 : ${DOCKER_FILE:=Dockerfile}
 : ${DOCKER_BUILD_LOCAL:=false}
 : ${DOCKER_CONTEXT:=.}
