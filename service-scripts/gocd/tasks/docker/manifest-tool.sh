@@ -3,11 +3,11 @@ set -e
 
 echo ">> RUN"
 : ${DOCKER_REPO:=qnib}
-: ${DOCKER_REGISTRY:=docker.io}
 : ${DOCKER_USE_LOGIN:=false}
 : ${DOCKER_REGISTRY_INSECURE:=false}
 : ${MANIFESTTOOL_OPTS}
 source /opt/service-scripts/gocd/helpers/ucp.sh
+eval_docker_secrets
 if [[ ${DOCKER_USE_LOGIN} == "true" ]];then
   docker_login
 else

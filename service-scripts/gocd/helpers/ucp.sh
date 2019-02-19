@@ -5,12 +5,12 @@
 
 function eval_docker_secrets {
   if [[ "X${DOCKER_REGISTRY}" == "X" ]] && [[ -f "/run/secrets/docker/registryname" ]];then
-    DOCKER_REGISTRY=$(cat "/run/secrets/docker/registryname")
+    export DOCKER_REGISTRY=$(cat "/run/secrets/docker/registryname")
   elif [[ "X${DOCKER_REGISTRY}" == "X" ]];then
-    DOCKER_REGISTRY="docker.io"
+    export DOCKER_REGISTRY="docker.io"
   fi
   if [[ "X${DOCKER_USER}" == "X" ]] && [[ -f "/run/secrets/docker/${DOCKER_REGISTRY}/username" ]];then
-    DOCKER_USER=$(cat "/run/secrets/docker/${DOCKER_REGISTRY}/username")
+    export DOCKER_USER=$(cat "/run/secrets/docker/${DOCKER_REGISTRY}/username")
   fi
   echo ">> DOCKER_USER:${DOCKER_USER} // DOCKER_REGISTRY=${DOCKER_REGISTRY}"
 }
