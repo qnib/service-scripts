@@ -12,10 +12,11 @@ function eval_docker_secrets {
   if [[ "X${DOCKER_USER}" == "X" ]] && [[ -f "/run/secrets/docker/${DOCKER_REGISTRY}/username" ]];then
     DOCKER_USER=$(cat "/run/secrets/docker/${DOCKER_REGISTRY}/username")
   fi
+  echo ">> DOCKER_USER:${DOCKER_USER} // DOCKER_REGISTRY=${DOCKER_REGISTRY}"
 }
 
 function ucp_source_bundle {
-  eval_docker_secrets()
+  eval_docker_secrets
   docker info 2>/dev/null |awk '/Name:/{print $2}' > ~/docker-node
   if [[ "X${HOME_DIR}" != "X" ]] && [[ -f "${HOME_DIR}/${DOCKER_USER}/bundle/env.sh" ]];then
     echo ">> Source bundle '${HOME_DIR}/${DOCKER_USER}/bundle/env.sh'"
@@ -29,7 +30,7 @@ function ucp_source_bundle {
 }
 
 function docker_login {
-  eval_docker_secrets()
+  eval_docker_secrets
   if [[ "X${DOCKER_USER}" != "X" ]] && [[ -f "/run/secrets/${DOCKER_REGISTRY}/${DOCKER_USER}/password" ]];then
       docker login ${DOCKER_REGISTRY} --username ${DOCKER_USER} --password $(cat "/run/secrets/${DOCKER_REGISTRY}/${DOCKER_USER}/password")
   else

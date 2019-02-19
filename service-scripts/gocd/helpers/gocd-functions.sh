@@ -5,6 +5,8 @@
 : ${FROM_IMG_TAG:=latest}
 
 function assemble_build_img_name {
+    source /opt/service-scripts/gocd/helpers/ucp.sh
+    eval_docker_secrets
     # Create BUILD_IMG_NAME, which includes the git-hash and the revision of the pipeline
     export IMG_NAME=$(echo ${GO_PIPELINE_NAME} |awk -F'[\_\.]' '{print $1}')
     if [[ "$(echo ${GO_PIPELINE_NAME} |awk -F\. '{print NF-1}')" != 0 ]];then
@@ -28,6 +30,8 @@ function assemble_build_img_name {
 }
 
 function assemble_target_img_name {
+    source /opt/service-scripts/gocd/helpers/ucp.sh
+    eval_docker_secrets
     if [[ -z ${1} ]];then
       echo "!! >> Please provide TARGERT_NAME as argument to assemble_target_img_name()"
     fi
